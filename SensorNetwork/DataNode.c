@@ -137,7 +137,7 @@ int main()
 		{
 			//온도 데이터 얻어옴
 			//온도 데이터 보냄
-			SendFrameData(fd_socket, 11, "27", sizeof("27"));
+			SendFrameData(fd_socket, 1, "27", sizeof("27"));
 
 			//서버 응답에 대한 처리
 			/*if (1 == GetFrameData(fd_socket, &message_id, &p_body_data, &body_size))
@@ -153,13 +153,13 @@ int main()
 			*/
 
 			sleep(20);
-		}
-
-		if (g_ctrl_c_pressed)
-		{
-			printf("Ctrl^C Pressed\n");
-			printf("Stop server sevice!!\n");
-			break;
+			
+			if (g_ctrl_c_pressed)
+			{
+				printf("Ctrl^C Pressed\n");
+				printf("Stop client!!\n");
+				break;
+			}
 		}
 	}
 

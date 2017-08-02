@@ -11,6 +11,15 @@
 #include <sys/types.h>
 #include "Api_mysql.h"
 
+char UserID[16];
+char UserPW[16];
+char Database[32];
+
+void Set_DB_User(char* id, char* pw);
+void Set_Database(char* db_name);
+
+void SendQuery(char* a_query);
+
 bool g_ctrl_c_pressed = false;
 void sig_handler(int a_signal)
 {
@@ -165,19 +174,24 @@ int main()
 						if (p_body_data != NULL)
 						{
 							memset(strQuery, 0, sizeof(strQuery));
+							Set_DB_User("testid", "testpw");
+							Set_Database("testdb");
+
 							switch (message_id)
 							{
 								case 1:
 									// INSERT INTO Temperature VALUES ('정보를 보낸 노드 번호', '시간', %s);
-									sprintf(strQuery, "INSERT INTO Temperature VALUES (%s)", p_body_data);
-									Single_Query(DATABASE, strQuery);
-									//SendFrameData(fd_client_socket, 1, "STRING", sizeof("STRING"));
+									sprintf(strQuery, "INSERT INTO Temperature (value) VALUES (%s);", p_body_data);
 									break;
 								case 2:
-									sprintf(strQuery, "INSERT INTO Humidity VALUES (%s)", p_body_data);
-									Single_Query(DATABASE, strQuery);
+									sprintf(strQuery, "INSERT INTO Humidity (value) VALUES (%s);", p_body_data);
 									break;
 							}
+
+							printf("Query : %s\n", strQuery);
+							SendQuery(strQuery);
+							//SendFrameData(fd_client_socket, 1, "OK^TEMP", sizeof("STRING"));
+							
 							free(p_body_data);
 						}
 					}
@@ -200,4 +214,46 @@ int main()
 
 	close(fd_listen_socket);
 	return 0;
+}
+
+void Set_DB_User(char* id, char* pw)
+{
+	memset(UserID, 0, sizeof(UserID));
+	memset(UserPW, 0, sizeof(UserPW));
+	if(id != NULL)	memcpy(UserID, id, strlen(id));
+	if(pw != NULL)	memcpy(UserPW, pw, strlen(pw));
+}
+
+void Set_Database(char* db_name)
+{
+	memset(Database, 0, sizeof(Database));
+	if(db_name != NULL)	memcpy(Database, db_name, strlen(db_name));
+}
+
+void finish_with_error(MYSQL *con)
+{
+	fprintf(stderr, "%s\n", mysql_error(con));
+	mysql_close(con);
+	exit(1);        
+}
+
+void SendQuery(char* a_query)
+{
+	if(Database == NULL)		printf("(!) Set 'Database' first\n");
+	if(UserID == NULL)			printf("(!) Set 'User ID of DB' first\n");
+	if(UserPW == NULL)			printf("(!) Set 'User PW of DB' first\n");
+
+	MYSQL *con = mysql_init(NULL);
+	if (con == NULL) 
+	{
+		fprintf(stderr, "%s \n", mysql_error(con));
+		exit(1);
+	}
+
+	if (mysql_real_connect(con, "localhost", UserID, UserPW, Database, 0, NULL, 0) == NULL)
+		finish_with_error(con);
+	if (mysql_query(con, a_query))
+	    finish_with_error(con);
+
+	mysql_close(con);
 }

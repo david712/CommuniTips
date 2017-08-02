@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "api_mysql.h": "c",
+        "stdio.h": "c",
+        "reactor.h": "c",
+        "my_dbug.h": "c",
+        "my_global.h": "c",
+        "string2.h": "c"
+    }
+}
