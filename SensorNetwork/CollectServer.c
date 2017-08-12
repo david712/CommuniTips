@@ -135,8 +135,8 @@ int main()
 	temp_client_info_size = sizeof(cli_addr);
 
 	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-	serv_addr.sin_port = htons(29001);
+	serv_addr.sin_addr.s_addr = inet_addr(INADDR_ANY);
+	serv_addr.sin_port = htons(25002);
 
 	if (bind(fd_listen_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
 	{
@@ -179,13 +179,13 @@ int main()
 
 							switch (message_id)
 							{
-								case 1:
+								case 0x01:
 									// INSERT INTO Temperature VALUES ('정보를 보낸 노드 번호', '시간', %s);
 									sprintf(strQuery, "INSERT INTO Temperature (value) VALUES (%s);", p_body_data);
 									break;
-								case 2:
-									sprintf(strQuery, "INSERT INTO Humidity (value) VALUES (%s);", p_body_data);
-									break;
+								//case 2:
+								//	sprintf(strQuery, "INSERT INTO Humidity (value) VALUES (%s);", p_body_data);
+								//	break;
 							}
 
 							printf("Query : %s\n", strQuery);
